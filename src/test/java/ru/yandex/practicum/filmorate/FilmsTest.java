@@ -70,9 +70,9 @@ class FilmsTest {
     @Test
     public void checkDurationTest() {
         FilmChecker filmChecker = new FilmChecker(testFilm);
-        testFilm.setDuration(-1);
+        testFilm.setDuration(-1L);
         assertFalse(filmChecker.check());
-        testFilm.setDuration(150);
+        testFilm.setDuration(150L);
         assertTrue(filmChecker.check());
     }
 }
