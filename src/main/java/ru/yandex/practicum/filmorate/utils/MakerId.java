@@ -1,10 +1,10 @@
 package ru.yandex.practicum.filmorate.utils;
 
-public class MakeId {
+public class MakerId {
 
     private int id;
 
-    public MakeId() {
+    public MakerId() {
         this.id = 0;
     }
 

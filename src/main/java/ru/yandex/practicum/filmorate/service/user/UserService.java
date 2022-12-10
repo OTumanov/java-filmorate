@@ -1,18 +1,18 @@
-package ru.yandex.practicum.filmorate.service;
+package ru.yandex.practicum.filmorate.service.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.*;
 
 @Service
 @Slf4j
-public class UserService {
+public class UserService implements UserServiceInterface {
     private final UserStorage userStorage;
 
     @Autowired
@@ -20,40 +20,48 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    @Override
     public User getUser(Integer id) {
         return returnUserOrElseThrow(id);
     }
 
+    @Override
     public List<User> getAllUsers() {
         return userStorage.getAllUsers();
     }
 
+    @Override
     public User addUser(User user) {
         userStorage.saveUser(user);
         return user;
     }
 
+    @Override
     public void removeUser(Integer id) {
         returnUserOrElseThrow(id);
         userStorage.deleteUser(id);
     }
 
+    @Override
     public User updateUser(User user) {
         returnUserOrElseThrow(user.getId());
         userStorage.saveUser(user);
         return user;
     }
 
+    @Override
     public void addAFriend(Integer userId, Integer friendId) {
         returnUserOrElseThrow(userId).addAFriend(friendId);
         returnUserOrElseThrow(friendId).addAFriend(userId);
     }
 
+    @Override
     public void removeAFriend(Integer userId, Integer friendId) {
         returnUserOrElseThrow(userId).removeAFriend(friendId);
         returnUserOrElseThrow(friendId).removeAFriend(userId);
     }
 
+    @Override
     public List<User> getFriendsOfUser(Integer userId) {
 
         List<User> friendsOfUser = new ArrayList<>();
@@ -67,6 +75,7 @@ public class UserService {
         return friendsOfUser;
     }
 
+    @Override
     public List<User> getCommonFriendsOfUser(Integer userId, Integer otherId) {
 
         Set<User> friendsOfUser = new HashSet<>();

@@ -1,17 +1,17 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.utils.MakeId;
+import ru.yandex.practicum.filmorate.utils.MakerId;
 
 import java.util.*;
-@Component
+
+@Repository
 public class InMemoryFilmStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
 
-    private final MakeId id = new MakeId();
+    private final MakerId id = new MakerId();
 
     @Override
     public Film saveFilm(Film film) {
@@ -19,6 +19,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         films.put(film.getId(), film);
         return film;
     }
+
     @Override
     public Optional<Film> getFilm(Integer filmId) {
         return Optional.ofNullable(films.get(filmId));
