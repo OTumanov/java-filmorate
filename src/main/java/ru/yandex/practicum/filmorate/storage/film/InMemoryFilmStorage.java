@@ -21,6 +21,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
+    public Film updateFilm(Film film) {
+        if (film.getId() == null) film.setId(id.gen());
+        films.put(film.getId(), film);
+        return film;
+    }
+
+    @Override
     public Optional<Film> getFilm(Integer filmId) {
         return Optional.ofNullable(films.get(filmId));
     }
@@ -31,16 +38,34 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void deleteFilm(Integer filmId) {
+    public Optional<Film> deleteFilm(Integer filmId) {
         films.remove(filmId);
+        return Optional.empty();
     }
 
     @Override
+    public Optional<Film> addLike(int filmId, int userId) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Film removeLike(int filmId, int userId) {
+        //TODO
+        return null;
+    }
+
+    @Override
+    public List<Film> getBestFilms(int count) {
+        //TODO
+        return null;
+    }
+
+
     public void deleteAllFilms() {
         films.clear();
     }
 
-    @Override
+
     public Optional<List<Integer>> getLikeOfFilm(Integer filmId) {
         if (getFilm(filmId).isPresent()) {
             return Optional.of(new ArrayList<>(films.get(filmId).getLikes()));

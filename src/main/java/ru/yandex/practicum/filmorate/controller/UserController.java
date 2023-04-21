@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,45 +9,43 @@ import ru.yandex.practicum.filmorate.exception.InvalidIdException;
 import ru.yandex.practicum.filmorate.exception.InvalidParameterCounter;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.response.ErrorResponse;
-import ru.yandex.practicum.filmorate.service.user.UserService;
+import ru.yandex.practicum.filmorate.storage.user.dao.UserDbStorage;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 
 @RestController
 @RequestMapping(value = "/users")
 @Slf4j
+@RequiredArgsConstructor
 public class UserController {
-    private final UserService userService;
-
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+    private final UserDbStorage userDbStorage;
 
     @PostMapping
     public User create(@Valid @RequestBody User user) {
         log.info("Запрос: POST /users");
-        userService.addUser(user);
+        userDbStorage.saveUser(user);
         return user;
     }
 
     @GetMapping(value = "/{id}")
-    public User getUser(@PathVariable(value = "id") int userId) {
+    public Optional<User> getUser(@PathVariable(value = "id") int userId) {
         log.info("Запрос: GET /users/{}", userId);
-        return userService.getUser(userId);
+        return userDbStorage.getUser(userId);
     }
 
     @GetMapping()
     public List<User> getAllUsers() {
         log.info("Запрос: GET /users");
-        return userService.getAllUsers();
+        return userDbStorage.getAllUsers();
     }
 
     @PutMapping
     public User update(@Valid @RequestBody User user) {
         log.info("Запрос: PUT /users");
-        userService.updateUser(user);
+        userDbStorage.update(user);
         return user;
     }
 
@@ -55,7 +54,7 @@ public class UserController {
             @PathVariable("id") int userId,
             @PathVariable int friendId) {
         log.info("Запрос: PUT users/{}/friends/{}", userId, friendId);
-        userService.addAFriend(userId, friendId);
+        userDbStorage.addFriendship(userId, friendId);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
@@ -64,14 +63,14 @@ public class UserController {
             @PathVariable("id") int userId,
             @PathVariable int friendId) {
         log.info("Запрос: DELETE users/{}/friends/{}", userId, friendId);
-        userService.removeAFriend(userId, friendId);
+        userDbStorage.removeFriendship(userId, friendId);
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
     @GetMapping(value = "/{id}/friends")
-    public List<User> findFriendsOfUser(@PathVariable(value = "id") int userId) {
+    public Optional<Object> findFriendsOfUser(@PathVariable(value = "id") int userId) {
         log.info("Запрос: GET /users/{}/friends", userId);
-        return userService.getFriendsOfUser(userId);
+        return userDbStorage.getAllIdsFriendsByUserId(userId);
     }
 
     @GetMapping(value = "/{id}/friends/common/{otherId}")
@@ -79,7 +78,7 @@ public class UserController {
             @PathVariable("id") int userId,
             @PathVariable int otherId) {
         log.info("Запрос: GET /users/{}/friends/common/{}", userId, otherId);
-        return userService.getCommonFriendsOfUser(userId, otherId);
+        return userDbStorage.getCommonFriendsList(userId, otherId);
     }
 
     @ExceptionHandler

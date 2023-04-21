@@ -12,6 +12,11 @@ public class InMemoryUserStorage implements UserStorage {
     private final MakerId id = new MakerId();
 
     @Override
+    public User update(User user) {
+        return user;
+    }
+
+    @Override
     public Optional<User> getUser(Integer id) {
         return Optional.ofNullable(users.get(id));
     }
@@ -29,21 +34,36 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void deleteUser(Integer id) {
+    public User deleteUser(Integer id) {
         users.remove(id);
+        return null;
     }
 
     @Override
+    public List<Integer> addFriendship(Integer firstUserId, Integer secondUserId) {
+        return null;
+    }
+
+    @Override
+    public List<Integer> removeFriendship(Integer firstUserId, Integer secondUserId) {
+        return null;
+    }
+
     public void deleteAllUsers() {
         users.clear();
     }
 
     @Override
-    public Optional<List<Integer>> getAllIdsFriendsByUserId(Integer userId) {
+    public Optional<Object> getAllIdsFriendsByUserId(Integer userId) {
         if (getUser(userId).isPresent()) {
-            return Optional.of(new ArrayList<>(users.get(userId).getFriends()));
+            return Optional.ofNullable(getUser(userId).get().getFriends());
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<User> getCommonFriendsList(int firstUserId, int secondUserId) {
+        return null;
     }
 }

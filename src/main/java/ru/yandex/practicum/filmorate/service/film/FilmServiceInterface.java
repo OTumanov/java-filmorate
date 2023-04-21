@@ -3,10 +3,11 @@ package ru.yandex.practicum.filmorate.service.film;
 import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
+import java.util.Optional;
 
- interface FilmServiceInterface {
+interface FilmServiceInterface {
 
-     Film getFilm(Integer filmId);
+     Optional<Film> getFilm(Integer filmId);
 
      List<Film> getAllFilms();
 
@@ -16,7 +17,7 @@ import java.util.List;
 
      void deleteFilm(Integer filmId);
 
-     void likeFilm(Integer filmId, Integer userId);
+     Optional<Film> likeFilm(Integer filmId, Integer userId);
 
      void removeLikeFilm(Integer filmId, Integer userId);
 

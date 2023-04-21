@@ -6,15 +6,21 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserStorage {
+    User update(User user);
+
     Optional<User> getUser(Integer id);
 
     List<User> getAllUsers();
 
     User saveUser(User user);
 
-    void deleteUser(Integer id);
+    User deleteUser(Integer id);
 
-    void deleteAllUsers();
+    List<Integer> addFriendship(Integer firstUserId, Integer secondUserId);
 
-    Optional<List<Integer>> getAllIdsFriendsByUserId(Integer userId);
+    List<Integer> removeFriendship(Integer firstUserId, Integer secondUserId);
+
+    Optional<Object> getAllIdsFriendsByUserId(Integer userId);
+
+    List<User> getCommonFriendsList(int firstUserId, int secondUserId);
 }

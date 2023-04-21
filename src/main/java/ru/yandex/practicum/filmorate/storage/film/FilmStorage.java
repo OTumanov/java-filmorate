@@ -12,10 +12,13 @@ public interface FilmStorage {
 
     Film saveFilm(Film film);
 
-    void deleteFilm(Integer filmId);
+    Film updateFilm(Film film);
 
-    void deleteAllFilms();
+    Optional<Film> deleteFilm(Integer filmId);
 
-    Optional<List<Integer>> getLikeOfFilm(Integer filmId);
+    Optional<Film> addLike(int filmId, int userId);
 
+    Film removeLike(int filmId, int userId);
+
+    List<Film> getBestFilms(int count);
 }

@@ -1,24 +1,19 @@
 package ru.yandex.practicum.filmorate.service.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.dao.UserDbStorage;
 
 import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserService implements UserServiceInterface {
-    private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserDbStorage userDbStorage;
 
     @Override
     public User getUser(Integer id) {
@@ -27,25 +22,25 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userDbStorage.getAllUsers();
     }
 
     @Override
     public User addUser(User user) {
-        userStorage.saveUser(user);
+        userDbStorage.saveUser(user);
         return user;
     }
 
     @Override
     public void removeUser(Integer id) {
         returnUserOrElseThrow(id);
-        userStorage.deleteUser(id);
+        userDbStorage.deleteUser(id);
     }
 
     @Override
     public User updateUser(User user) {
         returnUserOrElseThrow(user.getId());
-        userStorage.saveUser(user);
+        userDbStorage.saveUser(user);
         return user;
     }
 
@@ -66,9 +61,9 @@ public class UserService implements UserServiceInterface {
 
         List<User> friendsOfUser = new ArrayList<>();
 
-        for (User user : userStorage.getAllUsers()) {
+        for (User user : userDbStorage.getAllUsers()) {
             if (returnUserOrElseThrow(userId).getFriends().contains(user.getId())) {
-                Optional<User> listFriendsOfUser = userStorage.getUser(user.getId());
+                Optional<User> listFriendsOfUser = userDbStorage.getUser(user.getId());
                 friendsOfUser.add(listFriendsOfUser.get());
             }
         }
@@ -81,16 +76,16 @@ public class UserService implements UserServiceInterface {
         Set<User> friendsOfUser = new HashSet<>();
         Set<User> friendsOfOtherUser = new HashSet<>();
 
-        for (User user : userStorage.getAllUsers()) {
+        for (User user : userDbStorage.getAllUsers()) {
             if (returnUserOrElseThrow(userId).getFriends().contains(user.getId())) {
-                Optional<User> listFriendsOfUser = userStorage.getUser(user.getId());
+                Optional<User> listFriendsOfUser = userDbStorage.getUser(user.getId());
                 friendsOfUser.add(listFriendsOfUser.get());
             }
         }
 
-        for (User otherUser : userStorage.getAllUsers()) {
+        for (User otherUser : userDbStorage.getAllUsers()) {
             if (returnUserOrElseThrow(otherId).getFriends().contains(otherUser.getId())) {
-                Optional<User> listFriendsOfOtherUser = userStorage.getUser(otherUser.getId());
+                Optional<User> listFriendsOfOtherUser = userDbStorage.getUser(otherUser.getId());
                 friendsOfOtherUser.add(listFriendsOfOtherUser.get());
             }
         }
@@ -99,7 +94,7 @@ public class UserService implements UserServiceInterface {
         return new ArrayList<>(friendsOfUser);
     }
 
-    private User returnUserOrElseThrow(Integer userId) {
-        return userStorage.getUser(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    public User returnUserOrElseThrow(Integer userId) {
+        return userDbStorage.getUser(userId).orElseThrow(() -> new UserNotFoundException(userId));
     }
 }
