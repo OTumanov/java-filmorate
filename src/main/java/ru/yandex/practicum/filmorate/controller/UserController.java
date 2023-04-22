@@ -2,96 +2,74 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.InvalidIdException;
-import ru.yandex.practicum.filmorate.exception.InvalidParameterCounter;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.response.ErrorResponse;
-import ru.yandex.practicum.filmorate.storage.user.dao.UserDbStorage;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-
-@RestController
-@RequestMapping(value = "/users")
 @Slf4j
+@RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserDbStorage userDbStorage;
+    private final UserService userService;
+
+    @GetMapping("/{id}")
+    public Optional<User> getUser(@PathVariable Integer id) {
+        log.info("Контроллер: запрос пользователя с id {}", id);
+        return userService.getUser(id);
+    }
+
+    @GetMapping
+    public List<User> getAllUsers() {
+        log.info("Контроллер: запрос всех пользователей");
+        return userService.getAllUsers();
+    }
 
     @PostMapping
-    public User create(@Valid @RequestBody User user) {
-        log.info("Запрос: POST /users");
-        userDbStorage.saveUser(user);
-        return user;
-    }
-
-    @GetMapping(value = "/{id}")
-    public Optional<User> getUser(@PathVariable(value = "id") int userId) {
-        log.info("Запрос: GET /users/{}", userId);
-        return userDbStorage.getUser(userId);
-    }
-
-    @GetMapping()
-    public List<User> getAllUsers() {
-        log.info("Запрос: GET /users");
-        return userDbStorage.getAllUsers();
+    public User addUser(@Valid @RequestBody User user) {
+        log.info("Контроллер: запрос на добавление пользователя с именем {}, логином {} , почтой {} и датой рождения {}",
+                user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+        return userService.addUser(user);
     }
 
     @PutMapping
-    public User update(@Valid @RequestBody User user) {
-        log.info("Запрос: PUT /users");
-        userDbStorage.update(user);
-        return user;
+    public User updateUser(@Valid @RequestBody User user) {
+        log.info("Контроллер: запрос на обновление пользователя с id {}. Данные для обновления: имя {}, логин {}, почта {} и дата рождения {}",
+                user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+        return userService.updateUser(user);
     }
 
-    @PutMapping(value = "/{id}/friends/{friendId}")
-    public ResponseEntity<User> addToFriends(
-            @PathVariable("id") int userId,
-            @PathVariable int friendId) {
-        log.info("Запрос: PUT users/{}/friends/{}", userId, friendId);
-        userDbStorage.addFriendship(userId, friendId);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    @DeleteMapping("/{id}")
+    public User deleteById(@PathVariable Integer id) {
+        log.info("Контроллер: запрос на удаление пользователя с id {}", id);
+        return userService.removeUser(id);
     }
 
-    @DeleteMapping(value = "/{id}/friends/{friendId}")
-    public ResponseEntity<User> removeFromFriends(
-            @PathVariable("id") int userId,
-            @PathVariable int friendId) {
-        log.info("Запрос: DELETE users/{}/friends/{}", userId, friendId);
-        userDbStorage.removeFriendship(userId, friendId);
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    @PutMapping("/{firstUserId}/friends/{secondUserId}")
+    public List<Integer> addFriends(@PathVariable Integer firstUserId, @PathVariable Integer secondUserId) {
+        log.info("Контроллер: запрос на добавление дружбы пользователям с id {} и id {}", firstUserId, secondUserId);
+        return userService.addAFriend(firstUserId, secondUserId);
     }
 
-    @GetMapping(value = "/{id}/friends")
-    public Optional<Object> findFriendsOfUser(@PathVariable(value = "id") int userId) {
-        log.info("Запрос: GET /users/{}/friends", userId);
-        return userDbStorage.getAllIdsFriendsByUserId(userId);
+    @DeleteMapping("/{firstUserId}/friends/{secondUserId}")
+    public List<Integer> deleteFriends(@PathVariable Integer firstUserId, @PathVariable Integer secondUserId) {
+        log.info("Контроллер: запрос на удаление дружбы пользователям с id {} и id {}", firstUserId, secondUserId);
+        return userService.removeAFriend(firstUserId, secondUserId);
     }
 
-    @GetMapping(value = "/{id}/friends/common/{otherId}")
-    public List<User> findCommonFriends(
-            @PathVariable("id") int userId,
-            @PathVariable int otherId) {
-        log.info("Запрос: GET /users/{}/friends/common/{}", userId, otherId);
-        return userDbStorage.getCommonFriendsList(userId, otherId);
+    @GetMapping("/{id}/friends")
+    public Optional<Object> getFriends(@PathVariable Integer id) {
+        log.info("Контроллер: запрос друзей пользователя с id {}", id);
+        return userService.getFriendsOfUser(id);
     }
 
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handleInvalidIdException(final InvalidIdException e) {
-        log.warn(e.getMessage());
-        return new ErrorResponse("Нет такого id!", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleInvalidParameterCounter(final InvalidParameterCounter e) {
-        log.warn(e.getMessage());
-        return new ErrorResponse("Внутренняя ошибка сервера", e.getMessage());
+    @GetMapping("/{firstUserId}/friends/common/{secondUserId}")
+    public List<User> getCommonFriends(@PathVariable Integer firstUserId, @PathVariable Integer secondUserId) {
+        log.info("Контроллер: запрос общих друзей пользователей с id {} и id {}", firstUserId, secondUserId);
+        return userService.getCommonFriendsOfUser(firstUserId, secondUserId);
     }
 }

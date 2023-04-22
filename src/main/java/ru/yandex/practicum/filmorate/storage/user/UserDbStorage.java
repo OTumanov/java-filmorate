@@ -5,7 +5,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import java.util.List;
 import java.util.Optional;
 
-public interface UserStorage {
+public interface UserDbStorage {
     User update(User user);
 
     Optional<User> getUser(Integer id);
@@ -23,4 +23,6 @@ public interface UserStorage {
     Optional<Object> getAllIdsFriendsByUserId(Integer userId);
 
     List<User> getCommonFriendsList(int firstUserId, int secondUserId);
+    void validate(User user);
+    void checkUser(Integer id);
 }

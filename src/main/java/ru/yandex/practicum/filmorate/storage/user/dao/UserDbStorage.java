@@ -7,22 +7,33 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UserDbStorage implements UserStorage {
+public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user.UserDbStorage {
     private final JdbcTemplate jdbcTemplate;
+
+    @Override
+    public Optional<User> getUser(Integer id) {
+        final String sqlQuery =
+                "SELECT * " +
+                        "FROM users " +
+                        "WHERE id = ?";
+
+        log.info("DAO: Запрос пользователя с id {} успешно обработан", id);
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), id));
+    }
 
     @Override
     public List<User> getAllUsers() {
@@ -30,8 +41,8 @@ public class UserDbStorage implements UserStorage {
                 "SELECT * " +
                         "FROM users";
 
-        log.info("Запрос всех пользователей");
-        return jdbcTemplate.query(getAllUsersSqlQuery, this::makeUser);
+        log.info("DAO: Запрос всех пользователей успешно обработан");
+        return jdbcTemplate.query(getAllUsersSqlQuery, (rs, rowNum) -> makeUser(rs, rowNum));
     }
 
     @Override
@@ -57,7 +68,7 @@ public class UserDbStorage implements UserStorage {
 
         user.setId((Integer) genId.getKey());
 
-        log.info("Пользователь с id {} сохранен", user.getId());
+        log.info("DAO: запрос на добавление пользователя успешно обработан. Создан пользователь с id {}", user.getId());
         return user;
     }
 
@@ -71,19 +82,8 @@ public class UserDbStorage implements UserStorage {
         jdbcTemplate.update(updateSqlQuery, user.getEmail(), user.getLogin(),
                 user.getName(), user.getBirthday(), user.getId());
 
-        log.info("Пользователь с id {} обновлен", user.getId());
+        log.info("DAO: Пользователь с id {} обновлен успешно", user.getId());
         return user;
-    }
-
-    @Override
-    public Optional<User> getUser(Integer id) {
-        final String sqlQuery =
-                "SELECT * " +
-                        "FROM users " +
-                        "WHERE id = ?";
-
-        log.info("Запрос пользователя с id {}", id);
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), id));
     }
 
     @Override
@@ -100,7 +100,7 @@ public class UserDbStorage implements UserStorage {
         User user = jdbcTemplate.queryForObject(deleteUserSqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), id);
 
         jdbcTemplate.update(deleteSqlQuery, id);
-        log.info("Пользователь с id {} удалён", id);
+        log.info("DAO: Пользователь с id {} удалён", id);
         return user;
     }
 
@@ -123,10 +123,10 @@ public class UserDbStorage implements UserStorage {
 
         if (userRows.next()) {
             jdbcTemplate.update(addFriendshipSqlQuery, true, firstUserId, secondUserId);
-            log.info("user с id = {} подтвердил дружбу с user id = {}", firstUserId, secondUserId);
+            log.info("DAO: Пользователь с id {} подтвердил дружбу с пользователем с id {}", firstUserId, secondUserId);
         } else {
             jdbcTemplate.update(sqlWriteQuery, firstUserId, secondUserId, false);
-            log.info("user с id = {} подписался на user id = {}", firstUserId, secondUserId);
+            log.info("DAO: Пользователь с id {} отправил запрос на добавление в друзья пользователю id {}", firstUserId, secondUserId);
         }
         return List.of(firstUserId, secondUserId);
     }
@@ -141,7 +141,7 @@ public class UserDbStorage implements UserStorage {
 
         jdbcTemplate.update(deleteSqlQuery, firstUserId, secondUserId);
 
-        log.info("Пользователю с id {} удалили из друзей пользователя с id {}", firstUserId, secondUserId);
+        log.info("DAO: Пользователь с id {} удалили из друзей пользователя с id {}", firstUserId, secondUserId);
         return List.of(firstUserId, secondUserId);
     }
 
@@ -153,7 +153,7 @@ public class UserDbStorage implements UserStorage {
                         "LEFT JOIN friends ON users.id = friends.friend_id " +
                         "WHERE user_id = ?";
 
-        log.info("Глядим в список  друзей пользователя {}", userId);
+        log.info("DAO: Глядим в список  друзей пользователя с id {}", userId);
         return Optional.of(jdbcTemplate.query(getFriendsListByUserIdSqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), userId));
     }
 
@@ -169,25 +169,52 @@ public class UserDbStorage implements UserStorage {
                         "LEFT JOIN users ON users.id = friends.friend_id " +
                         "WHERE friends.user_id = ?)";
 
-        log.info("Глядим на список общих друзей пользователей {} и {}", firstUserId, secondUserId);
+        log.info("DAO: Глядим на список общих друзей пользователей c id {} и c id {}", firstUserId, secondUserId);
         return jdbcTemplate.query(getCommonFriendsListSqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), firstUserId, secondUserId);
     }
 
-    private User makeUser(ResultSet rs, int rowNum) throws SQLException {
-        Integer id = rs.getInt("id");
-        String email = rs.getString("email");
-        String login = rs.getString("login");
-        String name = rs.getString("name");
-        LocalDate birthday = rs.getDate("birthday").toLocalDate();
-        return new User(id, email, login, name, birthday);
+    @Override
+    public void validate(User user) {
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            throw new ValidationException("Поле email не может быть пустым");
+        }
+        if (user.getLogin() == null || user.getLogin().isEmpty()) {
+            throw new ValidationException("Поле login не может быть пустым");
+        }
+        if (user.getName() == null || user.getName().isEmpty()) {
+            throw new ValidationException("Поле name не может быть пустым");
+        }
+        if (user.getBirthday() == null) {
+            throw new ValidationException("Поле birthday не может быть пустым");
+        }
     }
-//
-//    public void checkUser(int id) {
-//        final String sqlCheckQuery = "SELECT * FROM users WHERE id = ?";
-//        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlCheckQuery, id);
-//        if (!userRows.next()) {
-//            log.info("user с id = {} не найден.", id);
-//            throw new UserNotFoundException(id);
-//        }
-//    }
+
+    private User makeUser(ResultSet rs, int rowNum) throws SQLException {
+        User user = new User();
+
+        user.setId(rs.getInt("id"));
+        user.setEmail(rs.getString("email"));
+        user.setName(rs.getString("name"));
+        user.setLogin(rs.getString("login"));
+        user.setBirthday(rs.getDate("birthday").toLocalDate());
+
+        log.info("DAO: Метод по созданию пользователя из RS. Получили пользвателя с id {}, именем {}, логином {}, почтой {} и днем рождения {}",
+                user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+
+        return user;
+    }
+
+    public void checkUser(Integer id) {
+        final String sqlCheckQuery =
+                "SELECT * " +
+                        "FROM users " +
+                        "WHERE id = ?";
+
+        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sqlCheckQuery, id);
+
+        if (!userRows.next()) {
+            log.info("DAO: Запрошенного пользователя с id {} не существует в базе данных", id);
+            throw new ObjectNotFoundException("Запрошенного пользователя с id " + id + " не существует в базе данных");
+        }
+    }
 }
