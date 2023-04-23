@@ -30,9 +30,12 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film getFilm(Integer id) {
         final String getFilmSqlQuery =
-                "SELECT * " +
-                        "FROM films " +
-                        "WHERE id = ?";
+//                "SELECT *, FG.GENRE_ID, G.GENRE_NAME " +
+//                        "FROM FILMS " +
+//                        "LEFT JOIN FILM_GENRE FG on FILMS.ID = FG.FILM_ID " +
+//                        "JOIN GENRE G on FG.GENRE_ID = G.GENRE_ID " +
+//                        "WHERE FILM_ID=?";
+                "SELECT * FROM films WHERE id=?";
 
         log.info("DAO: Запрос фильма с id {} успешно обработан", id);
         return jdbcTemplate.queryForObject(getFilmSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id);
@@ -52,6 +55,8 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Film saveFilm(Film film) {
         KeyHolder genId = new GeneratedKeyHolder();
+
+        System.out.println(film.getGenres());
 
         final String saveFilmSqlQuery =
                 "INSERT " +
@@ -242,7 +247,7 @@ public class FilmDbStorage implements FilmStorage {
                         "FROM genre LEFT JOIN film_genre FG on genre.genre_id = FG.GENRE_ID " +
                         "WHERE film_id = ?";
 
-        return jdbcTemplate.query(sqlQuery, (resultSet, rowNum) -> makeGenre(resultSet, rowNum), id);
+        return jdbcTemplate.query(sqlQuery, (resultSet, rowNum) -> makeGenreFromSQLQuery(resultSet, rowNum), id);
     }
 
     private Mpa getMpaByFilmId(int id) {
@@ -259,8 +264,7 @@ public class FilmDbStorage implements FilmStorage {
         return new Mpa(mpaRows.getInt("mpa_id"), mpaRows.getString("mpa_name"));
     }
 
-
-    private Genre makeGenre(ResultSet resultSet, int rowNum) throws SQLException {
+    private Genre makeGenreFromSQLQuery(ResultSet resultSet, int rowNum) throws SQLException {
         int id = resultSet.getInt("genre_id");
         String name = resultSet.getString("genre_name");
 
@@ -268,15 +272,43 @@ public class FilmDbStorage implements FilmStorage {
         return new Genre(id, name);
     }
 
-    private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
+    private Genre makeGenre(ResultSet rs) throws SQLException {
+        return new Genre(rs.getInt("genre_id"), rs.getString("genre_name"));
+    }
 
+    private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
         Integer id = rs.getInt("id");
         String name = rs.getString("name");
         String description = rs.getString("description");
         Long duration = rs.getLong("duration");
         LocalDate releaseDate = LocalDate.parse(rs.getString("release_date"));
         Mpa mpa = getMpaByFilmId(rs.getInt("id"));
-        List<Genre> genres = getGenreByFilmId(rs.getInt("id"));
+
+//        List<Genre> genres = new ArrayList<>();
+//        while (rs.next()) {
+//            Genre genre = new Genre();
+//            genre.setId(rs.getInt("genre_id"));
+//            genre.setName(rs.getString("genre_name"));
+//            genres.add(genre);
+//        }
+
+//        List<Genre> genres = new ArrayList();
+//        while(rs.next()){  // 4 number of columns
+//            Genre genre = new Genre();
+//            genre.setId(rs.getInt("genre_id"));
+//            genre.setName(rs.getString("genre_name"));
+//            genres.add(genre);
+//        }
+
+//        List<Genre> genres = new ArrayList();
+//        for (int i = 0; i < rowNum; i++) {
+//            Genre genre = new Genre();
+//            genre.setId(rs.getInt("genre_id"));
+//            genre.setName(rs.getString("genre_name"));
+//            genres.add(genre);
+//        }
+
+        List<Genre> genres = getGenreByFilmId(id);
 
         log.info("DAO: Метод создания объекта фильма из бд с id {}", id);
         return new Film(id, name, description, releaseDate, duration, mpa, genres);

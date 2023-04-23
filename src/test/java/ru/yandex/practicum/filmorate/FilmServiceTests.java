@@ -9,12 +9,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.film.FilmService;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -32,7 +34,7 @@ class FilmServiceTests {
             "descriptionFilm1",
             LocalDate.of(1999, 11, 5),
             120L, new Mpa(1, "G"),
-            null);
+            List.of(new Genre(1, "Комедия")));
 
     Film film2 = new Film(
             2,
@@ -41,7 +43,7 @@ class FilmServiceTests {
             LocalDate.of(1980, 6, 11),
             118L,
             new Mpa(1, "G"),
-            null);
+            new ArrayList<>());
 
     private final User user = new User(
             1,
