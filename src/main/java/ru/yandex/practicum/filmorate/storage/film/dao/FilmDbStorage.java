@@ -7,6 +7,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -34,7 +35,7 @@ public class FilmDbStorage implements FilmStorage {
                         "FROM films " +
                         "WHERE id = ?";
 
-        log.info("Запрос фильма с id {}", id);
+        log.info("DAO: Запрос фильма с id {} успешно обработан", id);
         return Optional.ofNullable(jdbcTemplate.queryForObject(getFilmSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id));
     }
 
@@ -45,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
                 "SELECT * " +
                         "FROM films";
 
-        log.info("Запрос всех фильмов");
+        log.info("DAO: Запрос всех фильмов успешно обработан");
         return jdbcTemplate.query(getAllFilmsSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum));
     }
 
@@ -84,7 +85,7 @@ public class FilmDbStorage implements FilmStorage {
 
         film.setId((Integer) genId.getKey());
 
-        if (!film.getGenres().isEmpty()) {
+        if (film.getGenres() != null) {
             for (Genre genre : film.getGenres()) {
                 SqlRowSet checkFilmInGenre = jdbcTemplate.queryForRowSet(
                         findDuplicateSqlQuery, film.getId(), genre.getId()
@@ -100,7 +101,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenreByFilmId(film.getId()));
         film.setMpa(getMpaByFilmId(film.getId()));
 
-        log.info("Фильм {} сохранен!", film.getName());
+        log.info("DAO: Запрос на добавление фильма успешно обработан. Создан новый фильм с id {}", film.getName());
         return film;
     }
 
@@ -158,7 +159,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setMpa(getMpaByFilmId(film.getId()));
         film.setGenres(getGenreByFilmId(film.getId()));
 
-        log.info("Фильм {} с id {} обновлен", film.getName(), film.getId());
+        log.info("DAO: Фильм {} с id {} успешно обновлен", film.getName(), film.getId());
         return film;
     }
 
@@ -188,12 +189,12 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(deleteMpaSqlQuery, id);
         jdbcTemplate.update(sqlDeleteLikesQuery, id);
 
-        log.info("Удален фильм {} с id {}", film.get().getName(), id);
+        log.info("DAO: Фильм с id {} успешно удален", id);
         return Optional.of(film.get());
     }
 
     @Override
-    public Optional<Film> addLike(int filmId, int userId) {
+    public Optional<Film> addLike(Integer filmId, Integer userId) {
         final String addLikeSqlQuery =
                 "INSERT " +
                         "INTO films_likes (film_id, user_id) " +
@@ -201,12 +202,12 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.update(addLikeSqlQuery, filmId, userId);
 
-        log.info("Лайк фильму {} от {}", filmId, userId);
+        log.info("DAO: Лайк фильму {} от пользователя с id {}", filmId, userId);
         return getFilm(filmId);
     }
 
     @Override
-    public Film removeLike(int filmId, int userId) {
+    public Film removeLike(Integer filmId, Integer userId) {
         final String removeLikeSqlQuery =
                 "DELETE " +
                         "FROM films_likes " +
@@ -214,7 +215,7 @@ public class FilmDbStorage implements FilmStorage {
 
         jdbcTemplate.update(removeLikeSqlQuery, filmId, userId);
 
-        log.info("Лайк пользователя {} фильму {} удалён", userId, filmId);
+        log.info("DAO: Лайк от пользователя с id {} фильму с id {} удалён", userId, filmId);
         return null;
     }
 
@@ -230,10 +231,11 @@ public class FilmDbStorage implements FilmStorage {
                         "ORDER BY COUNT(fl.film_id) DESC " +
                         "LIMIT ?";
 
-        log.info("Выводим {} самых популярных фильмов", count);
+        log.info("DAO: Запрос на ТОП{} фильмов", count);
 
         return jdbcTemplate.query(getBestFilmsSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), count);
     }
+
 
     private List<Genre> getGenreByFilmId(int id) {
         final String sqlQuery =
@@ -254,6 +256,7 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(sqlQuery, id);
         mpaRows.next();
 
+        log.info("DAO: Запрос на MPA фильма с id {}", id);
         return new Mpa(mpaRows.getInt("mpa_id"), mpaRows.getString("mpa_name"));
     }
 
@@ -262,11 +265,11 @@ public class FilmDbStorage implements FilmStorage {
         int id = resultSet.getInt("genre_id");
         String name = resultSet.getString("genre_name");
 
+        log.info("DAO: Запрос на создание жанра {} с id {}", name, id);
         return new Genre(id, name);
     }
 
     private Film makeFilm(ResultSet rs, int rowNum) throws SQLException {
-//        checkFilm(rs.getInt("id"));
 
         Integer id = rs.getInt("id");
         String name = rs.getString("name");
@@ -276,21 +279,22 @@ public class FilmDbStorage implements FilmStorage {
         Mpa mpa = getMpaByFilmId(rs.getInt("id"));
         List<Genre> genres = getGenreByFilmId(rs.getInt("id"));
 
+        log.info("DAO: Метод создания объекта фильма из бд с id {}", id);
         return new Film(id, name, description, releaseDate, duration, mpa, genres);
     }
 
-//
-//    public void checkFilm(Integer id) throws ObjectNotFoundException {
-//        String checkFilmSqlQuery =
-//                "SELECT *" +
-//                        "FROM films " +
-//                        "WHERE id = ?";
-//
-//        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(checkFilmSqlQuery, id);
-//
-//        if (!sqlRowSet.next()) {
-//            log.warn("Фильм с id {} не найден!", id);
-//            throw new FilmNotFoundException(id);
-//        }
-//    }
+
+    public void checkFilm(Integer id) throws ObjectNotFoundException {
+        String checkFilmSqlQuery =
+                "SELECT *" +
+                        "FROM films " +
+                        "WHERE id = ?";
+
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(checkFilmSqlQuery, id);
+
+        if (!sqlRowSet.next()) {
+            log.warn("Запрошенного фильма с id {} не существует", id);
+            throw new ObjectNotFoundException("Запрошенного фильма с id " + id + " не существует");
+        }
+    }
 }

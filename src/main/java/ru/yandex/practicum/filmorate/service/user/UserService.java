@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class UserService implements UserServiceInterface {
     private final UserDbStorage userDbStorage;
@@ -39,19 +39,19 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public User removeUser(Integer id) {
-        returnUserOrElseThrow(id);
-        log.info("Сервис: Запрос на удаление пользователя с id {}", id);
-        return userDbStorage.deleteUser(id);
-    }
-
-    @Override
     public User updateUser(User user) {
         log.info("Сервис: Запрос на обновление пользователя с id {}. Данные для обновления: имя {}, логин {}, почта {} и дата рождения {}",
                 user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
         validateName(user);
         checkUser(user.getId());
         return userDbStorage.update(user);
+    }
+
+    @Override
+    public User removeUser(Integer id) {
+        returnUserOrThrow(id);
+        log.info("Сервис: Запрос на удаление пользователя с id {}", id);
+        return userDbStorage.deleteUser(id);
     }
 
     @Override
@@ -96,7 +96,8 @@ public class UserService implements UserServiceInterface {
         }
     }
 
-    public User returnUserOrElseThrow(Integer userId) {
+    public User returnUserOrThrow(Integer userId) {
+
         return userDbStorage.getUser(userId).orElseThrow(() -> {
             log.info("Сервис: Запрос на проверку пользователя с id {}", userId);
             return new ObjectNotFoundException("Пользователь с id " + userId + " не найден");

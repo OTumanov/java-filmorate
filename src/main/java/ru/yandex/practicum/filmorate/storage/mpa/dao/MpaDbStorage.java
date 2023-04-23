@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.MpaNotFoundExceprion;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
@@ -25,7 +26,7 @@ public class MpaDbStorage implements MpaStorage {
                 "SELECT mpa_id, mpa_name " +
                         "FROM mpa";
 
-        log.info("Запрашиваем все MPA");
+        log.info("DAO: Запрашиваем все MPA");
         return jdbcTemplate.query(getAllSqlQuery, (rs, rowNum) -> makeMpa(rs, rowNum));
     }
 
@@ -39,8 +40,8 @@ public class MpaDbStorage implements MpaStorage {
         SqlRowSet mpaRows = jdbcTemplate.queryForRowSet(getByIdSqlQuery, id);
 
         if (!mpaRows.next()) {
-            log.info("Нет такого MPA с id {}!", id);
-            throw new MpaNotFoundExceprion(id);
+            log.info("DAO: Нет такого MPA с id {}!", id);
+            throw new ObjectNotFoundException("Нет такого MPA с id " + id);
         }
         return jdbcTemplate.queryForObject(getByIdSqlQuery, (rs, rowNum) -> makeMpa(rs, rowNum), id);
     }

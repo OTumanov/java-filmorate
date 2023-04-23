@@ -19,8 +19,8 @@ interface FilmServiceInterface {
 
      Optional<Film> likeFilm(Integer filmId, Integer userId);
 
-     void removeLikeFilm(Integer filmId, Integer userId);
+     Film removeLikeFilm(Integer filmId, Integer userId);
 
-     List<Film> getTopTenOrCounterFilms(Integer counter);
+     List<Film> getTopFilms(Integer counter);
 }
 

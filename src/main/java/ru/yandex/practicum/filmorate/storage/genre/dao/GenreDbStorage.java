@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
+import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
@@ -21,6 +22,7 @@ public class GenreDbStorage implements GenreStorage {
 
     @Override
     public Genre getById(int id) {
+        log.info("DAO: Запрашиваем жанр с id {}", id);
         final String getByIdSqlQuery =
                 "SELECT genre_id, genre_name " +
                         "FROM genre " +
@@ -29,8 +31,8 @@ public class GenreDbStorage implements GenreStorage {
         SqlRowSet genreRows = jdbcTemplate.queryForRowSet(getByIdSqlQuery, id);
 
         if (!genreRows.next()) {
-            log.info("Нет такого жанра с id {}", id);
-            throw new GenreNotFoundException(id);
+            log.info("DAO: Нет такого жанра с id {}", id);
+            throw new ObjectNotFoundException("Нет такого жанра с id " + id);
         }
         return jdbcTemplate.queryForObject(getByIdSqlQuery, (rs, rowNum) -> makeGenre(rs, rowNum), id);
     }
@@ -41,7 +43,7 @@ public class GenreDbStorage implements GenreStorage {
                 "SELECT genre_id, genre_name " +
                         "FROM genre ";
 
-        log.info("Запрашиваем все существующие жанры");
+        log.info("DAO: Запрашиваем все существующие жанры");
         return jdbcTemplate.query(findAllSqlQuery, (rs, rowNum) -> makeGenre(rs, rowNum));
     }
 

@@ -16,9 +16,9 @@ public interface FilmStorage {
 
     Optional<Film> deleteFilm(Integer filmId);
 
-    Optional<Film> addLike(int filmId, int userId);
+    Optional<Film> addLike(Integer filmId, Integer userId);
 
-    Film removeLike(int filmId, int userId);
+    Film removeLike(Integer filmId, Integer userId);
 
     List<Film> getBestFilms(int count);
 }

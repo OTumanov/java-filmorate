@@ -68,7 +68,7 @@ public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user
 
         user.setId((Integer) genId.getKey());
 
-        log.info("DAO: запрос на добавление пользователя успешно обработан. Создан пользователь с id {}", user.getId());
+        log.info("DAO: Запрос на добавление пользователя успешно обработан. Создан пользователь с id {}", user.getId());
         return user;
     }
 
@@ -82,7 +82,7 @@ public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user
         jdbcTemplate.update(updateSqlQuery, user.getEmail(), user.getLogin(),
                 user.getName(), user.getBirthday(), user.getId());
 
-        log.info("DAO: Пользователь с id {} обновлен успешно", user.getId());
+        log.info("DAO: Пользователь {} с id {} обновлен успешно", user.getName(), user.getId());
         return user;
     }
 
