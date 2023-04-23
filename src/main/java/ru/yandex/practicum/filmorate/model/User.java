@@ -26,5 +26,6 @@ public class User {
     @Past
     private LocalDate birthday;
 
-    public User() {}
+    public User() {
+    }
 }
