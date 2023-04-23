@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -19,24 +19,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class FilmDbStorage implements FilmStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<Film> getFilm(Integer id) {
+    public Film getFilm(Integer id) {
         final String getFilmSqlQuery =
                 "SELECT * " +
                         "FROM films " +
                         "WHERE id = ?";
 
         log.info("DAO: Запрос фильма с id {} успешно обработан", id);
-        return Optional.ofNullable(jdbcTemplate.queryForObject(getFilmSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id));
+        return jdbcTemplate.queryForObject(getFilmSqlQuery, (rs, rowNum) -> makeFilm(rs, rowNum), id);
     }
 
 
@@ -164,8 +163,8 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public Optional<Film> deleteFilm(Integer id) {
-        Optional<Film> film = getFilm(id);
+    public Film deleteFilm(Integer id) {
+        Film film = getFilm(id);
 
         final String deleteSqlQuery =
                 "DELETE " +
@@ -190,11 +189,11 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlDeleteLikesQuery, id);
 
         log.info("DAO: Фильм с id {} успешно удален", id);
-        return Optional.of(film.get());
+        return film;
     }
 
     @Override
-    public Optional<Film> addLike(Integer filmId, Integer userId) {
+    public Film addLike(Integer filmId, Integer userId) {
         final String addLikeSqlQuery =
                 "INSERT " +
                         "INTO films_likes (film_id, user_id) " +

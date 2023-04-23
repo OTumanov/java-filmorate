@@ -3,10 +3,9 @@ package ru.yandex.practicum.filmorate.service.user;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.List;
-import java.util.Optional;
 
 interface UserServiceInterface {
-    Optional<User> getUser(Integer id);
+    User getUser(Integer id);
 
     List<User> getAllUsers();
 
@@ -20,7 +19,7 @@ interface UserServiceInterface {
 
     List<Integer> removeAFriend(Integer userId, Integer friendId);
 
-    Optional<Object> getFriendsOfUser(Integer userId);
+    List<User> getFriendsOfUser(Integer userId);
 
     List<User> getCommonFriendsOfUser(Integer userId, Integer otherId);
 }

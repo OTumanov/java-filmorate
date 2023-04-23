@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.service.film.FilmService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -19,7 +18,7 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping(value = "/{id}")
-    public Optional<Film> getFilm(@PathVariable("id") int filmId) {
+    public Film getFilm(@PathVariable("id") int filmId) {
         log.info("Контроллер: запрос фильма с id {}", filmId);
 
         return filmService.getFilm(filmId);
@@ -47,7 +46,7 @@ public class FilmController {
     }
 
     @PutMapping(value = "/{id}/like/{userId}")
-    public Optional<Film> likeFilm(@PathVariable("id") int filmId, @PathVariable int userId) {
+    public Film likeFilm(@PathVariable("id") int filmId, @PathVariable int userId) {
         log.info("Контроллер: запрос на добавление лайка фильму с id {} от пользователя с id {}", filmId, userId);
 
         return filmService.likeFilm(filmId, userId);

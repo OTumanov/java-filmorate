@@ -3,12 +3,10 @@ package ru.yandex.practicum.filmorate.service.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -17,7 +15,7 @@ public class UserService implements UserServiceInterface {
     private final UserDbStorage userDbStorage;
 
     @Override
-    public Optional<User> getUser(Integer id) {
+    public User getUser(Integer id) {
         log.info("Сервис: Запрос пользователя с id {}", id);
         checkUser(id);
         return userDbStorage.getUser(id);
@@ -49,7 +47,8 @@ public class UserService implements UserServiceInterface {
 
     @Override
     public User removeUser(Integer id) {
-        returnUserOrThrow(id);
+//        returnUserOrThrow(id);
+        checkUser(id);
         log.info("Сервис: Запрос на удаление пользователя с id {}", id);
         return userDbStorage.deleteUser(id);
     }
@@ -70,7 +69,7 @@ public class UserService implements UserServiceInterface {
     }
 
     @Override
-    public Optional<Object> getFriendsOfUser(Integer userId) {
+    public List<User> getFriendsOfUser(Integer userId) {
         log.info("Сервис: Запрос на получение друзей пользователя с id {}", userId);
         checkUser(userId);
         return userDbStorage.getAllIdsFriendsByUserId(userId);
@@ -96,11 +95,11 @@ public class UserService implements UserServiceInterface {
         }
     }
 
-    public User returnUserOrThrow(Integer userId) {
-
-        return userDbStorage.getUser(userId).orElseThrow(() -> {
-            log.info("Сервис: Запрос на проверку пользователя с id {}", userId);
-            return new ObjectNotFoundException("Пользователь с id " + userId + " не найден");
-        });
-    }
+//    public User returnUserOrThrow(Integer userId) {
+//
+//        return userDbStorage.getUser(userId).orElseThrow(() -> {
+//            log.info("Сервис: Запрос на проверку пользователя с id {}", userId);
+//            return new ObjectNotFoundException("Пользователь с id " + userId + " не найден");
+//        });
+//    }
 }

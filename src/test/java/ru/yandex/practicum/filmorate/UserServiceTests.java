@@ -11,11 +11,9 @@ import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,7 +42,7 @@ public class UserServiceTests {
     void addUserAndGetUserTest() {
         userService.addUser(user1);
 
-        assertEquals(Optional.of(user1), userService.getUser(1));
+        assertEquals(user1, userService.getUser(1));
     }
 
     @Test
@@ -70,7 +68,7 @@ public class UserServiceTests {
         user1.setName("updatedUserName");
         userService.updateUser(user1);
 
-        assertEquals(Optional.of(user1), userService.getUser(1));
+        assertEquals(user1, userService.getUser(1));
     }
 
     @Test
@@ -79,11 +77,11 @@ public class UserServiceTests {
         user1.setName("userFriend1");
         userService.addUser(user2);
 
-        assertEquals(Optional.of(new ArrayList<>()), userService.getFriendsOfUser(1));
+        assertEquals(new ArrayList<>(), userService.getFriendsOfUser(1));
 
         userService.addAFriend(1, 2);
 
-        assertEquals(Optional.of(List.of(user2)), userService.getFriendsOfUser(1));
+        assertEquals(List.of(user2), userService.getFriendsOfUser(1));
     }
 
         @Test
@@ -93,11 +91,11 @@ public class UserServiceTests {
         userService.addUser(user2);
         userService.addAFriend(1, 2);
 
-        assertEquals(Optional.of(List.of(user2)), userService.getFriendsOfUser(1));
+        assertEquals(List.of(user2), userService.getFriendsOfUser(1));
 
         userService.removeAFriend(1, 2);
 
-        assertEquals(Optional.of(new ArrayList<>()), userService.getFriendsOfUser(1));
+        assertEquals(new ArrayList<>(), userService.getFriendsOfUser(1));
     }
 
     @Test

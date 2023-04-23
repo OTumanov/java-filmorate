@@ -16,7 +16,6 @@ import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -55,7 +54,7 @@ class FilmServiceTests {
     public void addFilmAndGetFilmTest() {
         filmService.addFilm(film);
 
-        assertEquals(Optional.of(film), filmService.getFilm(1));
+        assertEquals(film, filmService.getFilm(1));
     }
 
     @Test
@@ -71,7 +70,7 @@ class FilmServiceTests {
         film.setMpa(new Mpa(2, "PG"));
         filmService.updateFilm(film);
 
-        assertEquals(Optional.of(film), filmService.getFilm(1));
+        assertEquals((film), filmService.getFilm(1));
     }
 
     @Test

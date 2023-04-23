@@ -6,7 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -16,23 +16,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
-@Component
+@Repository
 @RequiredArgsConstructor
 public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user.UserDbStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Optional<User> getUser(Integer id) {
+    public User getUser(Integer id) {
         final String sqlQuery =
                 "SELECT * " +
                         "FROM users " +
                         "WHERE id = ?";
 
         log.info("DAO: Запрос пользователя с id {} успешно обработан", id);
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), id));
+        return jdbcTemplate.queryForObject(sqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), id);
     }
 
     @Override
@@ -146,7 +145,7 @@ public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user
     }
 
     @Override
-    public Optional<Object> getAllIdsFriendsByUserId(Integer userId) {
+    public List<User> getAllIdsFriendsByUserId(Integer userId) {
         final String getFriendsListByUserIdSqlQuery =
                 "SELECT id, email, login, name, birthday " +
                         "FROM users " +
@@ -154,7 +153,7 @@ public class UserDbStorage implements ru.yandex.practicum.filmorate.storage.user
                         "WHERE user_id = ?";
 
         log.info("DAO: Глядим в список  друзей пользователя с id {}", userId);
-        return Optional.of(jdbcTemplate.query(getFriendsListByUserIdSqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), userId));
+        return jdbcTemplate.query(getFriendsListByUserIdSqlQuery, (resultSet, rowNum) -> makeUser(resultSet, rowNum), userId);
     }
 
     @Override

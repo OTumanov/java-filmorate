@@ -4,13 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.InvalidParameterCounter;
-import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmDbStorage;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -21,7 +19,7 @@ public class FilmService implements FilmServiceInterface {
     private final UserService userService;
 
     @Override
-    public Optional<Film> getFilm(Integer filmId) {
+    public Film getFilm(Integer filmId) {
         log.info("Сервис: Запрос фильма с id {}", filmId);
 
         checkFilm(filmId);
@@ -48,7 +46,7 @@ public class FilmService implements FilmServiceInterface {
     public Film updateFilm(Film film) {
         log.info("Сервис: Запрос на обновление фильма {} с id {}", film.getName(), film.getId());
         checkFilm(film.getId());
-        returnFilmOrThrow(film.getId());
+//        returnFilmOrThrow(film.getId());
 
         return filmDbStorage.updateFilm(film);
     }
@@ -56,16 +54,18 @@ public class FilmService implements FilmServiceInterface {
     @Override
     public void deleteFilm(Integer filmId) {
         log.info("Сервис: Запрос на удаление фильма с id {}", filmId);
-        returnFilmOrThrow(filmId);
+        checkFilm(filmId);
+//        returnFilmOrThrow(filmId);
         filmDbStorage.deleteFilm(filmId);
     }
 
     @Override
-    public Optional<Film> likeFilm(Integer filmId, Integer userId) {
+    public Film likeFilm(Integer filmId, Integer userId) {
         log.info("Сервис: Запрос на лайк фильму с id {} от пользователя с id {}", filmId, userId);
-        returnFilmOrThrow(filmId);
-        userService.returnUserOrThrow(userId);
-
+        checkFilm(filmId);
+//        returnFilmOrThrow(filmId);
+//        userService.returnUserOrThrow(userId);
+        userService.checkUser(userId);
         return filmDbStorage.addLike(filmId, userId);
     }
 
@@ -94,12 +94,12 @@ public class FilmService implements FilmServiceInterface {
         filmDbStorage.checkFilm(filmId);
     }
 
-    private Film returnFilmOrThrow(Integer filmId) {
-
-        return filmDbStorage.getFilm(filmId).orElseThrow(() -> {
-                    log.info("Сервис: Запрос на проверку фильма с id {}", filmId);
-                    return new ObjectNotFoundException("Фильм с id " + filmId + " не найден");
-                }
-        );
-    }
+//    private Film returnFilmOrThrow(Integer filmId) {
+//
+//        return filmDbStorage.getFilm(filmId).orElseThrow(() -> {
+//                    log.info("Сервис: Запрос на проверку фильма с id {}", filmId);
+//                    return new ObjectNotFoundException("Фильм с id " + filmId + " не найден");
+//                }
+//        );
+//    }
 }
