@@ -23,6 +23,8 @@ public interface UserDbStorage {
     Optional<Object> getAllIdsFriendsByUserId(Integer userId);
 
     List<User> getCommonFriendsList(int firstUserId, int secondUserId);
+
     void validate(User user);
+
     void checkUser(Integer id);
 }
