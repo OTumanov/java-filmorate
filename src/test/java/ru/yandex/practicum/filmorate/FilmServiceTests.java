@@ -32,7 +32,8 @@ class FilmServiceTests {
             "Film1",
             "descriptionFilm1",
             LocalDate.of(1999, 11, 5),
-            120L, new Mpa(1, "G"));
+            120L, new Mpa(1, "G"),
+            null);
 
     Film film2 = new Film(
             2,

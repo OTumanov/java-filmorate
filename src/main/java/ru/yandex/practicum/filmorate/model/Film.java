@@ -40,14 +40,6 @@ public class Film {
         this.mpa = mpa;
         this.genres = genres;
     }
-    public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration, Mpa mpa) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.releaseDate = releaseDate;
-        this.duration = duration;
-        this.mpa = mpa;
-    }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Constraint(validatedBy = ReleaseDateValidator.class)

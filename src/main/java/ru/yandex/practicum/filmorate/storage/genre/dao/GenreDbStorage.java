@@ -20,7 +20,7 @@ public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Genre getById(int id) {
+    public Genre getGenre(Integer id) {
         log.info("DAO: Запрашиваем жанр с id {}", id);
         final String getByIdSqlQuery =
                 "SELECT genre_id, genre_name " +
@@ -37,7 +37,7 @@ public class GenreDbStorage implements GenreStorage {
     }
 
     @Override
-    public List<Genre> findAll() {
+    public List<Genre> getAllGenres() {
         final String findAllSqlQuery =
                 "SELECT genre_id, genre_name " +
                         "FROM genre ";

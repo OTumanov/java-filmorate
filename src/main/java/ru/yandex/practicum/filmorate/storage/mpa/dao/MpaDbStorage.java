@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.MpaNotFoundExceprion;
 import ru.yandex.practicum.filmorate.exception.ObjectNotFoundException;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
@@ -21,7 +20,7 @@ public class MpaDbStorage implements MpaStorage {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public List<Mpa> getAll() {
+    public List<Mpa> getAllMpa() {
         final String getAllSqlQuery =
                 "SELECT mpa_id, mpa_name " +
                         "FROM mpa";
@@ -31,7 +30,7 @@ public class MpaDbStorage implements MpaStorage {
     }
 
     @Override
-    public Mpa getById(Integer id) {
+    public Mpa getMpa(Integer id) {
         final String getByIdSqlQuery =
                 "SELECT mpa_id, mpa_name " +
                         "FROM mpa " +

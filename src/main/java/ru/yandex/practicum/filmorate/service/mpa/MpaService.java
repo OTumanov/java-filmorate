@@ -15,14 +15,14 @@ public class MpaService implements MpaServiceInterface {
     private final MpaStorage mpaStorage;
 
     @Override
-    public List<Mpa> findAll() {
+    public List<Mpa> getAllMpa() {
         log.info("Сервис: Получение всех MPA");
-        return mpaStorage.getAll();
+        return mpaStorage.getAllMpa();
     }
 
     @Override
-    public Mpa getById(int id) {
+    public Mpa getMpa(int id) {
         log.info("Сервис: Получение MPA с id");
-        return mpaStorage.getById(id);
+        return mpaStorage.getMpa(id);
     }
 }
