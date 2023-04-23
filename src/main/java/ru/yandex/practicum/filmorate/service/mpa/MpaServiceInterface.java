@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface MpaServiceInterface {
     List<Mpa> findAll();
+
     Mpa getById(int id);
 }

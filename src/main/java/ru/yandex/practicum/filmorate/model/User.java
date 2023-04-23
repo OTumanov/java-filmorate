@@ -14,9 +14,8 @@ import java.time.LocalDate;
 public class User {
     private Integer id;
 
-    //    @Email
-    @NotBlank(message = "Отсутствует email")
-    @Email(message = "Некорректный email")
+    @NotBlank(message = "Пустое поле email")
+    @Email(message = "Плохой формат поля email")
     private String email;
 
     @NotNull
@@ -27,30 +26,5 @@ public class User {
     @Past
     private LocalDate birthday;
 
-    public User() {
-
-    }
-
-
-//    public User(String email, String login, String name, LocalDate birthday) {
-//        this.email = email;
-//        this.login = login;
-//        this.name = (name == null || name.isEmpty() || name.isBlank()) ? login : name;
-//        this.birthday = birthday;
-//    }
-//    public User(Integer id, String email, String login, String name, LocalDate birthday) {
-//        this.id = id;
-//        this.email = email;
-//        this.login = login;
-//        this.name = (name == null || name.isEmpty() || name.isBlank()) ? login : name;
-//        this.birthday = birthday;
-//    }
-
-//    public void addAFriend(Integer friendId) {
-//        friends.add(friendId);
-//    }
-//
-//    public void removeAFriend(Integer friendId) {
-//        friends.remove(friendId);
-//    }
+    public User() {}
 }

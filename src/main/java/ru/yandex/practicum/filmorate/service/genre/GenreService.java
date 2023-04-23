@@ -16,11 +16,13 @@ public class GenreService implements GenreServiceInterface {
 
     @Override
     public List<Genre> findAll() {
+        log.info("Сервис: Получение всех жанров");
         return genreStorage.findAll();
     }
 
     @Override
     public Genre getById(int id) {
+        log.info("Сервис: Получение жанра с id");
         return genreStorage.getById(id);
     }
 }

@@ -41,13 +41,6 @@ public class Film {
         this.genres = genres;
     }
 
-    public void likeFilm(Integer userId) {
-        likes.add(userId);
-    }
-    public boolean removeLikeFilm(Integer userId) {
-        return likes.remove(userId);
-    }
-
     @Retention(RetentionPolicy.RUNTIME)
     @Constraint(validatedBy = ReleaseDateValidator.class)
     public @interface FilmReleaseDateCheck {

@@ -7,20 +7,20 @@ import java.util.Optional;
 
 interface FilmServiceInterface {
 
-     Optional<Film> getFilm(Integer filmId);
+    Optional<Film> getFilm(Integer filmId);
 
-     List<Film> getAllFilms();
+    List<Film> getAllFilms();
 
-     Film addFilm(Film film);
+    Film addFilm(Film film);
 
-     Film updateFilm(Film film);
+    Film updateFilm(Film film);
 
-     void deleteFilm(Integer filmId);
+    void deleteFilm(Integer filmId);
 
-     Optional<Film> likeFilm(Integer filmId, Integer userId);
+    Optional<Film> likeFilm(Integer filmId, Integer userId);
 
-     Film removeLikeFilm(Integer filmId, Integer userId);
+    Film removeLikeFilm(Integer filmId, Integer userId);
 
-     List<Film> getTopFilms(Integer counter);
+    List<Film> getTopFilms(Integer counter);
 }
 

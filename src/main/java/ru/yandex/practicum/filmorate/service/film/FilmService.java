@@ -9,10 +9,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.user.UserService;
 import ru.yandex.practicum.filmorate.storage.film.dao.FilmDbStorage;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,7 +37,7 @@ public class FilmService implements FilmServiceInterface {
 
     @Override
     public Film addFilm(Film film) {
-        log.info("Сервис: Запрос на добавление фильма с названием {} {} {} {} {} {}",
+        log.info("Сервис: Запрос на добавление фильма с названием {}, описанием {}, датой релиза {}, продолжительностью {}, MPA {} и жанром {}",
                 film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa(), film.getGenres());
         filmDbStorage.saveFilm(film);
 
@@ -83,22 +81,14 @@ public class FilmService implements FilmServiceInterface {
 
     @Override
     public List<Film> getTopFilms(Integer counter) {
-
         log.info("Сервис: Запрос на получение топ{} фильмов", counter);
+
         if (counter < 0) {
-            throw new InvalidParameterCounter("Счетчик должен быть положительным");
+            throw new InvalidParameterCounter("Счетчик должен быть положительным!");
         } else {
-
-            Comparator<Film> compare = Comparator.comparing(o -> o.getLikes().size());
-
-            return filmDbStorage.getBestFilms(counter)
-                    .stream()
-                    .sorted(compare.reversed())
-                    .limit(counter)
-                    .collect(Collectors.toList());
+            return filmDbStorage.getBestFilms(counter);
         }
     }
-
 
     public void checkFilm(Integer filmId) {
         filmDbStorage.checkFilm(filmId);
