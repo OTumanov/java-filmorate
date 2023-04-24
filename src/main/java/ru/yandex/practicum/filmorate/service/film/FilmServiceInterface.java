@@ -4,22 +4,22 @@ import ru.yandex.practicum.filmorate.model.Film;
 
 import java.util.List;
 
- interface FilmServiceInterface {
+interface FilmServiceInterface {
 
-     Film getFilm(Integer filmId);
+    Film getFilm(Integer filmId);
 
-     List<Film> getAllFilms();
+    List<Film> getAllFilms();
 
-     Film addFilm(Film film);
+    Film addFilm(Film film);
 
-     Film updateFilm(Film film);
+    Film updateFilm(Film film);
 
-     void deleteFilm(Integer filmId);
+    void deleteFilm(Integer filmId);
 
-     void likeFilm(Integer filmId, Integer userId);
+    Film likeFilm(Integer filmId, Integer userId);
 
-     void removeLikeFilm(Integer filmId, Integer userId);
+    Film removeLikeFilm(Integer filmId, Integer userId);
 
-     List<Film> getTopTenOrCounterFilms(Integer counter);
+    List<Film> getTopFilms(Integer counter);
 }
 

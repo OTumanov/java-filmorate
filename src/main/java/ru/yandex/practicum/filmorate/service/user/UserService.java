@@ -1,105 +1,105 @@
 package ru.yandex.practicum.filmorate.service.user;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.InMemoryUserStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserDbStorage;
 
-import java.util.*;
+import java.util.List;
 
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class UserService implements UserServiceInterface {
-    private final UserStorage userStorage;
-
-    @Autowired
-    public UserService(InMemoryUserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    private final UserDbStorage userDbStorage;
 
     @Override
     public User getUser(Integer id) {
-        return returnUserOrElseThrow(id);
+        log.info("Сервис: Запрос пользователя с id {}", id);
+        checkUser(id);
+        return userDbStorage.getUser(id);
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        log.info("Сервис: Запрос всех пользователей");
+        return userDbStorage.getAllUsers();
     }
 
     @Override
     public User addUser(User user) {
-        userStorage.saveUser(user);
+        log.info("Сервис: Запрос на добавление пользователя с именем {}, логином {} , почтой {} и датой рождения {}",
+                user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+        validateName(user);
+        userDbStorage.saveUser(user);
         return user;
-    }
-
-    @Override
-    public void removeUser(Integer id) {
-        returnUserOrElseThrow(id);
-        userStorage.deleteUser(id);
     }
 
     @Override
     public User updateUser(User user) {
-        returnUserOrElseThrow(user.getId());
-        userStorage.saveUser(user);
-        return user;
+        log.info("Сервис: Запрос на обновление пользователя с id {}. Данные для обновления: имя {}, логин {}, почта {} и дата рождения {}",
+                user.getId(), user.getName(), user.getLogin(), user.getEmail(), user.getBirthday());
+        validateName(user);
+        checkUser(user.getId());
+        return userDbStorage.update(user);
     }
 
     @Override
-    public void addAFriend(Integer userId, Integer friendId) {
-        returnUserOrElseThrow(userId).addAFriend(friendId);
-        returnUserOrElseThrow(friendId).addAFriend(userId);
+    public User removeUser(Integer id) {
+//        returnUserOrThrow(id);
+        checkUser(id);
+        log.info("Сервис: Запрос на удаление пользователя с id {}", id);
+        return userDbStorage.deleteUser(id);
     }
 
     @Override
-    public void removeAFriend(Integer userId, Integer friendId) {
-        returnUserOrElseThrow(userId).removeAFriend(friendId);
-        returnUserOrElseThrow(friendId).removeAFriend(userId);
+    public List<Integer> addAFriend(Integer firstUserId, Integer secondUserId) {
+        checkUser(firstUserId);
+        checkUser(secondUserId);
+        log.info("Сервис: Запрос на добавление дружбы пользователям с id {} и id {}", firstUserId, secondUserId);
+        return userDbStorage.addFriendship(firstUserId, secondUserId);
+    }
+
+    @Override
+    public List<Integer> removeAFriend(Integer userId, Integer friendId) {
+        checkUser(userId);
+        log.info("Сервис: Запрос на удаление дружбы пользователям с id {} и id {}", userId, friendId);
+        return userDbStorage.removeFriendship(userId, friendId);
     }
 
     @Override
     public List<User> getFriendsOfUser(Integer userId) {
-
-        List<User> friendsOfUser = new ArrayList<>();
-
-        for (User user : userStorage.getAllUsers()) {
-            if (returnUserOrElseThrow(userId).getFriends().contains(user.getId())) {
-                Optional<User> listFriendsOfUser = userStorage.getUser(user.getId());
-                friendsOfUser.add(listFriendsOfUser.get());
-            }
-        }
-        return friendsOfUser;
+        log.info("Сервис: Запрос на получение друзей пользователя с id {}", userId);
+        checkUser(userId);
+        return userDbStorage.getAllIdsFriendsByUserId(userId);
     }
 
     @Override
-    public List<User> getCommonFriendsOfUser(Integer userId, Integer otherId) {
-
-        Set<User> friendsOfUser = new HashSet<>();
-        Set<User> friendsOfOtherUser = new HashSet<>();
-
-        for (User user : userStorage.getAllUsers()) {
-            if (returnUserOrElseThrow(userId).getFriends().contains(user.getId())) {
-                Optional<User> listFriendsOfUser = userStorage.getUser(user.getId());
-                friendsOfUser.add(listFriendsOfUser.get());
-            }
-        }
-
-        for (User otherUser : userStorage.getAllUsers()) {
-            if (returnUserOrElseThrow(otherId).getFriends().contains(otherUser.getId())) {
-                Optional<User> listFriendsOfOtherUser = userStorage.getUser(otherUser.getId());
-                friendsOfOtherUser.add(listFriendsOfOtherUser.get());
-            }
-        }
-
-        friendsOfUser.retainAll(friendsOfOtherUser);
-        return new ArrayList<>(friendsOfUser);
+    public List<User> getCommonFriendsOfUser(Integer firstUserId, Integer secondUserId) {
+        log.info("Сервис: Запрос на получение общих друзей пользователей с id {} и id {}", firstUserId, secondUserId);
+        checkUser(firstUserId);
+        checkUser(secondUserId);
+        return userDbStorage.getCommonFriendsList(firstUserId, secondUserId);
     }
 
-    private User returnUserOrElseThrow(Integer userId) {
-        return userStorage.getUser(userId).orElseThrow(() -> new UserNotFoundException(userId));
+    public void checkUser(Integer id) {
+        log.info("Сервис: Запрос на проверку пользователя с id {}", id);
+        userDbStorage.checkUser(id);
     }
+
+    private void validateName(User user) {
+        log.info("Сервис: Запрос на проверку имени пользователя с id {}", user.getId());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+    }
+
+//    public User returnUserOrThrow(Integer userId) {
+//
+//        return userDbStorage.getUser(userId).orElseThrow(() -> {
+//            log.info("Сервис: Запрос на проверку пользователя с id {}", userId);
+//            return new ObjectNotFoundException("Пользователь с id " + userId + " не найден");
+//        });
+//    }
 }

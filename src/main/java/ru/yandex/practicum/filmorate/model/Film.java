@@ -12,6 +12,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -25,22 +26,19 @@ public class Film {
     LocalDate releaseDate;
     @Positive()
     Long duration;
+    private Mpa mpa;
 
+    private List<Genre> genres;
     Set<Integer> likes = new HashSet<>();
 
-    public Film(String name, String description, LocalDate releaseDate, long duration) {
+    public Film(Integer id, String name, String description, LocalDate releaseDate, Long duration, Mpa mpa, List<Genre> genres) {
+        this.id = id;
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
-    }
-
-    public void likeFilm(Integer userId) {
-        likes.add(userId);
-    }
-
-    public boolean removeLikeFilm(Integer userId) {
-        return likes.remove(userId);
+        this.mpa = mpa;
+        this.genres = genres;
     }
 
     @Retention(RetentionPolicy.RUNTIME)
